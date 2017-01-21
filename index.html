@@ -290,7 +290,7 @@
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
      xmlns:ev="http://www.w3.org/2001/xml-events"
-     width="0" height="0">
+	 id="markers" width="0" height="0">
 
     <marker id="triangle" refX="5" refY="5" markerUnits="strokeWidth" fill="#666"
             markerWidth="4" markerHeight="3" orient="auto" viewBox="0 0 10 10">
@@ -305,8 +305,41 @@
         <path d="M 0 0 L 10 5 L 0 10 z"/>
     </marker>
 </svg>
+<button class="export-svg">Export SVG</button>
+
+
 
 <script type="text/javascript">
+    window.addEventListener('load', function () {
+     function triggerDownload(content, name, type){
+         var blob = new Blob([content], {type: type});
+         var blobUrl = URL.createObjectURL(blob);
+
+         var a = document.createElement('a');
+         a.style.position = "absolute"; // getting off document flow
+         // making an effort to hide the element
+         a.style.zIndex = -1;
+         a.style.opacity = 0;
+
+         a.setAttribute('href', blobUrl);
+         a.setAttribute('download', name);
+         document.body.appendChild(a)
+         a.click();
+         document.body.removeChild(a);
+     }
+
+     document.querySelector('.export-svg').addEventListener('click', function(){
+         var svgContent = document.querySelector('.svg-container:not(.remote-container)').innerHTML;
+         var markers = document.querySelector('#markers').innerHTML;
+         fetch('./css/explaingit.css')
+           .then( function (response) { return response.text();})
+           .then( function (css) {
+         svgContent = svgContent.replace(">", '><defs> <style type="text/css"><![CDATA[' + css + ']]></style> </defs>' + markers);
+         triggerDownload(svgContent, 'git-explain.svg', 'image/svg+xml');
+     });
+     });
+});
+
 require(['explaingit'], function (explainGit) {
     var examples = {
         'commit': {
